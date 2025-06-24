@@ -8,7 +8,7 @@ Siamese networks consist of two identical sub-networks that share weights and le
 -[Scripts](#Scripts) 
  Python scripts for training, evaluation, and analysis.
 -[Notes](#Notes) 
- Figure, training results(metrics and verification), and other.
+ Figure, training results(metrics), and other.
 -[Paper](#Paper)
  The full paper detailing methodology, results, and discussions.
 ## Since the training dataset and models are large in size, I have uploaded them to the following Google Drive link:
