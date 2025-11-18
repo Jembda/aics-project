@@ -1,4 +1,34 @@
+# -------------------------------------
+# Siamese Network for Multimodal Similarity Learning on WikiDiverse Dataset
+# ---------------------------------------------------------------------------
+
+# This implementation is a modification and integration of concepts from multisources:
+##Primary Sources: 
+
+# 1. GeeksforGeeks (2024). “Siamese Neural Network in Deep Learning”. In: Geeks-
+# forGeeks. Accessed: 2024-11-17. url: https://www.geeksforgeeks.org/
+# nlp/siamese-neural-network-in-deep-learning/. 
+# 2. Dutt, Aditya (2021). “Siamese networks introduction and implementation”. In:
+# Medium, Towards Data Science 11.
+# 3. Singh, Prabhnoor (2019). Siamese network keras for image and text similarity.
+# 4. Koch, Gregory, Richard Zemel, and Ruslan Salakhutdinov (2015). “Siamese
+# Neural Networks for One-shot Image Recognition”. In: Proceedings of the
+# ICML Deep Learning Workshop
+
+#--------------------------------------
+# Key Modifications and Integrations:
+# -------------------------------------
+# Extend to multimodal (image + text) inputes instead of single modality
+# Added cross-attention mechanism
+# Implemenated robust data loader for Wikidivesre dataset
+# Added comprhensive logging and error handling 
+# Integrated BERT for text encoding alongside ResNet for images
+# Added advanced training features (early stopping, LR scheduling)
+# Implemented multi-feature fusion
+
+# -------------------------------------
 # An overview
+# -------------------------------------
 # Siamese networks consist of two identical sub-networks that share weights and learn to compute the similarity between two input samples. The goal is to learn embeddings such that similar inputs are close in the embedding space, while dissimilar inputs are far apart. For the WikiDiverse dataset, where we have image-caption pairs, we can build a Siamese network that processes text and image data (or just one modality like text or image) and learns to compute similarity between two entities from the knowledge base.
 # * Siamese Network Structure: Two identical sub-networks that compute embeddings for input pairs and learn their similarity
 # * Application: For WikiDiverse, compute similarity between image-caption pairs to link knowledge-base entities.
@@ -63,6 +93,12 @@ MAX_PAIRS_PER_ENTITY = 100
 # 2. Dataset Loading and Pair Generation
 #-----------------------------------
 def load_and_process_data(json_path):
+    """
+    Load and process WikiDiverse JSON data:
+    Based on data handling concept from:
+    - Sing(2019) for multimodal data preparation
+    - Koch et al (2015) for paired training
+    """
     try:
         with open(json_path, 'r') as f:
             data = json.load(f)
@@ -93,7 +129,12 @@ def get_local_image_path(img_url):
     return os.path.join(IMAGE_DIR, f"{prefix}{ext}")
 
 def generate_pairs(data, max_pairs_per_entity=MAX_PAIRS_PER_ENTITY):
-    """Generate balanced positive and negative pairs with limits"""
+    """
+    Generate balanced positive and negative pairs with limits.
+    Pair generation strategy adapted from:
+    -Dutt (2021) for balanced positive/negetative sampling
+    -Kotch et al (2015) one-shot learning pair construction
+    """
     if not data:
         logger.warning("No data to generate pairs")
         return []
@@ -158,6 +199,11 @@ def generate_pairs(data, max_pairs_per_entity=MAX_PAIRS_PER_ENTITY):
 # 3. Dataset Class with Robust Handling
 #-----------------------------------
 class WikiDiverseDataset(Dataset):
+    """
+    Custom dataset for multimodal data loading
+    - Sigh (2019) for multimodal data loading
+    - GeeksforGeeks (2024) for Siamese network data structure
+    """
     def __init__(self, pairs, transform=None, tokenizer=None, max_length=128):
         self.pairs = self._filter_valid_pairs(pairs)
         self.transform = transform or self.get_default_transform()
@@ -246,6 +292,12 @@ class WikiDiverseDataset(Dataset):
 # 4. Model Components
 #-----------------------------------
 class CrossAttention(nn.Module):
+    """
+    Cross-attention mechanism for multimodal feature fusion
+    Extension beyond origianl sources:
+    -Added cross-model attention between image and text features
+    -Inspired by moden transformation architectures
+    """
     def __init__(self, embed_dim, num_heads=8, dropout=0.1):
         super().__init__()
         self.multihead_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout)
@@ -258,6 +310,12 @@ class CrossAttention(nn.Module):
         return self.norm(query + attn_output)
 
 class ImageEncoder(nn.Module):
+    """
+    Image encoder  with cross-attention capablities 
+    Based on concepts from:
+    -Koch et al. (2015) for image features extraction in Siamese network
+    -Sigh (2019) for multimodal integration    
+    """
     def __init__(self, embed_dim=512):
         super().__init__()
         base_model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
@@ -283,6 +341,12 @@ class ImageEncoder(nn.Module):
         return x
 
 class TextEncoder(nn.Module):
+    """
+    Text encoder with cross-attention capablities.
+    Based on concepts from:
+    -Singh (2019) for text in multimodal Siamese networks
+    -Modern BERT integration for text features 
+    """
     def __init__(self, embed_dim=512):
         super().__init__()
         self.bert = BertModel.from_pretrained('bert-base-uncased')
@@ -305,6 +369,19 @@ class TextEncoder(nn.Module):
         return text_features
 
 class SiameseNetwork(nn.Module):
+    """
+    Multimodal Siamese Network for Similarity learning 
+    Core architecture based on:
+    - Koch et al. (2015) - Original Siamese network concept
+    - Dutt (2021) - practical implementation details
+    - GeeksforGeeks (2024) - Architecture overview
+    - Singh (2019) - Multimodal extensions
+
+    Key modification:
+    -Added cross-modal attention between image and text
+    - Multi-feature fusion
+    - Enhanced classifier head for similarity prediction
+    """
     def __init__(self, embed_dim=512):
         super().__init__()
         self.img_encoder = ImageEncoder(embed_dim)
@@ -345,6 +422,11 @@ class SiameseNetwork(nn.Module):
 # 5. Training and Evaluation Functions
 #-----------------------------------
 def train_epoch(model, loader, optimizer, criterion, device):
+    """
+    Training loop for one epoch
+    Training strategy  incorporation:
+    - Modern practices for stable training
+    """
     model.train()
     total_loss = 0.0
     progress_bar = tqdm(loader, desc="Training", leave=False)
@@ -377,6 +459,13 @@ def train_epoch(model, loader, optimizer, criterion, device):
     return total_loss / len(loader.dataset)
 
 def evaluate(model, loader, criterion, device):
+    """
+    Evaluation function with comprehensive metrics
+
+    Evaluation approach based on:
+    - Standard practices from all cited sources
+    - comprehensive metrics calculation for binary classification
+    """
     model.eval()
     total_loss = 0.0
     all_preds = []
@@ -419,6 +508,9 @@ def evaluate(model, loader, criterion, device):
 # 6. Main Execution
 #-----------------------------------
 def main():
+    """
+    Main training pipeline integration concepts from all sources
+    """
     # Load and prepare data
     logger.info("Loading training data...")
     train_data = load_and_process_data(TRAIN_JSON)
