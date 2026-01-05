@@ -1,6 +1,7 @@
-# aics-project title: A Siamese Network for Learning Multimodal Similarity in the WikiDiverse Dataset
+# aics-project title: A Multimodal Siamese Network for Learning Similarity in the WikiDiverse Dataset
 ## An overview
-Siamese networks consist of two identical sub-networks that share weights and learn to compute the similarity between two input samples. The goal is to learn embeddings such that similar inputs are close in the embedding space, while dissimilar inputs are far apart. For the WikiDiverse dataset, where we have image-caption pairs, we can build a Siamese network that processes text and image data (or just one modality like text or image) and learns to compute similarity between two entities from the knowledge base.
+Siamese networks consist of two identical sub-networks that share weights and learn to compute similarity between input pairs. This architecture is particularly effective for tasks requiring similarity learning, metric learning, or one-shot learning. 
+For the **WikiDiverse dataset** - a multimodal collection of image-caption pairs - our implementation leverages Siamese networks to learn semantic similarity across different modalities (text and visual content).
 ## * Siamese Network Structure: Two identical sub-networks that compute embeddings for input pairs and learn their similarity
 ## * Application: For WikiDiverse, compute similarity between image-caption pairs to link knowledge-base entities.
 
@@ -13,3 +14,4 @@ Siamese networks consist of two identical sub-networks that share weights and le
  The full paper detailing methodology, results, and discussions.
 ## Since the training dataset and models are large in size, I have uploaded them to the following Google Drive link:
 -[Link](#Link) https://drive.google.com/drive/folders/1BCFgt429xTY2nM1ZHMTGFPJmfgvRVYyz
+
